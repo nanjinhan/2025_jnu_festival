@@ -1,0 +1,20 @@
+[
+    
+  {
+    "_comment" : "--------전체 내용 추후 수정----------",
+    "id": "b1",
+    "name": "전대 학생회 부스",
+    "location": { "lat": 35.1764, "lng": 126.9038 }, 
+    "description": "다양한 이벤트와 상품 증정!",
+    "category": "이벤트",
+    "image": "/assets/images/booth_student_council.png"
+  },
+  {
+    "id": "b2",
+    "name": "음식 판매 부스 (떡볶이)",
+    "location": { "lat": 35.1750, "lng": 126.9045 },
+    "description": "매콤달콤한 즉석 떡볶이",
+    "category": "음식",
+    "image": "/assets/images/booth_tteokbokki.png"
+  }
+]
