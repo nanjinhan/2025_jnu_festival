@@ -4,26 +4,31 @@ import React from 'react';
 
 function BoothList({
   isVisible, onClose, onOpen, booths, isLoading,
-  selectedCategory, selectedSubCategory, setSelectedSubCategory, categoryMap
-}) {
+  selectedCategory, selectedSubCategory, setSelectedSubCategory, categoryMap,searchTerm,selectedTime
+}) 
+
+{
 
   const currentMainCategory = categoryMap.find(cat => cat.key === selectedCategory);
   const availableSubCategories = currentMainCategory ? currentMainCategory.subCategories : [];
 
   const filteredBooths = booths.filter(booth => {
     const mainCatObject = categoryMap.find(cat => cat.key === selectedCategory);
-    if (!mainCatObject) return false; // 혹시 모를 에러 방지
-    const mainCatNameToFilter = mainCatObject.name;
-  
+    const mainCatNameToFilter = mainCatObject ? mainCatObject.name : '';
     const mainMatch = selectedCategory === 'ALL' || booth.main_category === mainCatNameToFilter;
-    if (!mainMatch) {
-      return false; // 대분류가 다르면 더 이상 비교할 필요 없음
-    }
-    const subCatObject = mainCatObject.subCategories.find(sub => sub.key === selectedSubCategory);
+
+    const subCatObject = mainCatObject?.subCategories.find(sub => sub.key === selectedSubCategory);
     const subCatNameToFilter = subCatObject ? subCatObject.name : '';
     const subMatch = selectedSubCategory === 'ALL' || booth.sub_category === subCatNameToFilter;
+
+    const timeMatch = selectedTime === 'ALL' || booth.operating_time === selectedTime;
     
-    return subMatch;
+    // booth.name이 검색어를 포함하는지 확인
+    const searchMatch = (booth.name || '')
+      .toLowerCase()
+      .includes((searchTerm || '').toLowerCase());
+      
+    return mainMatch && subMatch && timeMatch && searchMatch;
   });
 
   const renderContent = () => {
@@ -58,13 +63,13 @@ function BoothList({
         style={{ width: '100%', height: '70px', padding: '12px', cursor: 'pointer', textAlign: 'center', boxSizing: 'border-box' }}
       >
         <div style={{ width: '40px', height: '4px', backgroundColor: '#d0d0d0', borderRadius: '2px', margin: '0 auto' }} />
-        {/* ✅ 1. 비어있던 p 태그에 텍스트 추가 */}
         <p style={{ margin: '8px 0 0', fontWeight: 'bold', fontSize: '16px', color: '#555' }}>
           
         </p>
       </div>
 
       {isVisible && availableSubCategories.length > 0 && (
+        
         <div className="horizontal-scroll-container" style={{ padding: '0 16px 12px', borderBottom: '1px solid #eee', overflowX: 'auto', whiteSpace: 'nowrap' }}>
           <button onClick={() => setSelectedSubCategory('ALL')} style={{ backgroundColor: selectedSubCategory === 'ALL' ? '#e8f0fe' : '#f1f3f4', color: selectedSubCategory === 'ALL' ? '#1967d2' : '#3c4043', border: 'none', padding: '6px 12px', borderRadius: '16px', marginRight: '8px', cursor: 'pointer', fontWeight: '500' }}>
             전체

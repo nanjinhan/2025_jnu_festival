@@ -2,7 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-function MapComponent({ booths, onMarkerClick, selectedCategory ,categoryMap}) {
+function MapComponent({ booths,
+  onMarkerClick,
+  selectedCategory,
+  categoryMap,
+  selectedTime,   // 👈 이 prop과
+  searchTerm }) {
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
@@ -39,10 +44,17 @@ function MapComponent({ booths, onMarkerClick, selectedCategory ,categoryMap}) {
     const categoryNameToFilter = currentCategory ? currentCategory.name : '';
 
     booths
-   
+      // ✅ 2. 필터링 로직에 검색 조건 추가
       .filter(booth => {
-        if (selectedCategory === 'ALL') return true;
-        return booth.main_category === categoryNameToFilter;
+        const categoryMatch = selectedCategory === 'ALL' || booth.main_category === categoryNameToFilter;
+        const timeMatch = selectedTime === 'ALL' || booth.operating_time === selectedTime;
+        // booth.name이 검색어를 포함하는지 확인 (대소문자 구분 없음)
+        const searchMatch = (booth.name || '')
+          .toLowerCase()
+          .includes((searchTerm || '').toLowerCase());
+
+        
+        return categoryMatch && timeMatch && searchMatch;
       })
       .forEach(booth => {
         const markerPosition = new window.kakao.maps.LatLng(booth.latitude, booth.longitude);
@@ -58,7 +70,7 @@ function MapComponent({ booths, onMarkerClick, selectedCategory ,categoryMap}) {
       });
 
     setMarkers(newMarkers);
-  }, [map, booths, selectedCategory, onMarkerClick, categoryMap]); 
+  },[map, booths, selectedCategory, selectedTime, searchTerm, onMarkerClick, categoryMap]);
 
   return (
     <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />
