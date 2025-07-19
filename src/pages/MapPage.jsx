@@ -1,47 +1,108 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// src/pages/MapPage.jsx
+
+import React, { useEffect, useState } from 'react';
 import MapComponent from '../components/MapComponent';
-import BoothList from '../components/BoothList'; // BoothList 컴포넌트 import
+import BoothList from '../components/BoothList';
+import { fetchBooths } from '../services/api';
+import './MapPage.css'; // 스크롤바 숨김 CSS를 위해 import
+
+// 카테고리 데이터 구조 (이 부분은 이전과 동일하게 잘 되어있습니다)
+const CATEGORY_MAP = [
+  { key: 'ALL', name: '전체', subCategories: [] },
+  { key: 'PERFORMANCE', name: '공연 구역', subCategories: [
+    { key: 'MAIN_STAGE', name: '본무대' },
+    { key: 'STREET_KARAOKE', name: '거리노래방' },
+  ]},
+  { key: 'BOOTH', name: '부스 구역', subCategories: [
+    { key: 'STUDENT_BOOTH', name: '학생부스' },
+    { key: 'COMPANY_BOOTH', name: '기업부스' },
+  ]},
+  { key: 'EXPERIENCE', name: '체험 구역', subCategories: [
+    { key: 'CONTENTS_ZONE', name: '컨텐츠존' },
+    { key: 'PHOTO_ZONE', name: '포토존' },
+  ]},
+  { key: 'FNB', name: 'F&B 구역', subCategories: [
+    { key: 'FOOD_TRUCK', name: '푸드트럭' },
+    { key: 'TABLE_ZONE', name: '테이블존' },
+  ]},
+  { key: 'SUPPORT', name: '운영 및 지원 구역', subCategories: [
+    { key: 'WRISTBAND_BOOTH', name: '팔찌 배부 부스' },
+    { key: 'SAFETY_BOOTH', name: '안전관리부스' },
+    { key: 'RESTROOM', name: '화장실' },
+  ]},
+];
 
 function MapPage() {
-  // 부스 목록 패널의 보이기/숨기기 상태를 관리합니다.
-  const [isListVisible, setIsListVisible] = useState(false);
+  const [booths, setBooths] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_MAP[0].key); // 'ALL'
+  const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      const data = await fetchBooths();
+      setBooths(data);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
+
+  // ✅ 1. 대분류 선택 시 소분류는 '전체'로 초기화하는 핸들러
+  const handleSelectCategory = (categoryKey) => {
+    setSelectedCategory(categoryKey);
+    setSelectedSubCategory('ALL');
+  };
 
   return (
-    <div className="py-4 md:py-8 h-full bg-gray-100">
-      <div className="bg-white p-6 rounded-2xl shadow-lg h-full flex flex-col w-full">
-        <header className="mb-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">축제 지도</h1>
-            <p className="text-gray-500 mt-1">지도에서 부스 위치와 주요 시설을 확인하세요.</p>
-          </div>
-          <Link
-            to="/"
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors"
+    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      {/* 카테고리 스크롤 버튼 컨테이너 */}
+      <div
+        className="horizontal-scroll-container"
+        style={{
+          position: 'absolute', top: '20px', left: 0, right: 0,
+          zIndex: 10, overflowX: 'auto', whiteSpace: 'nowrap', padding: '0 20px'
+        }}
+      >
+        {/* ✅ 2. CATEGORY_MAP을 직접 순회하도록 수정 */}
+        {CATEGORY_MAP.map((category) => (
+          <button
+            key={category.key}
+            onClick={() => handleSelectCategory(category.key)} // ✅ 핸들러 연결 수정
+            style={{
+              display: 'inline-block', marginRight: '8px', padding: '8px 16px',
+              border: '1px solid #ddd', borderRadius: '20px', cursor: 'pointer',
+              backgroundColor: selectedCategory === category.key ? '#1a73e8' : '#ffffff',
+              color: selectedCategory === category.key ? '#ffffff' : '#000000',
+              fontWeight: 'semibold', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s ease'
+            }}
           >
-            홈으로
-          </Link>
-        </header>
-        {/* 이 div가 지도와 버튼의 위치 기준점이 됩니다. */}
-        <div className="flex-grow rounded-xl overflow-hidden relative w-full h-full">
-          <MapComponent />
-
-          {/* 목록이 숨겨져 있을 때만 '목록 보기' 버튼을 표시합니다. */}
-          {!isListVisible && (
-            <button
-              onClick={() => setIsListVisible(true)}
-              className="absolute bottom-[88px] left-1/2 -translate-x-1/2 z-30 px-6 py-3 bg-blue-500 text-white font-bold rounded-full shadow-lg hover:bg-blue-600 transition-all animate-pulse"
-            >
-              부스 목록 보기
-            </button>
-          )}
-        </div>
+            {category.name}
+          </button>
+        ))}
       </div>
 
-      {/* 부스 목록 패널 컴포넌트 */}
-      <BoothList 
-        isVisible={isListVisible} 
-        onClose={() => setIsListVisible(false)} 
+      {/* 지도 컴포넌트 */}
+      <MapComponent
+        booths={booths}
+        onMarkerClick={() => setIsSheetOpen(true)}
+        selectedCategory={selectedCategory}
+        categoryMap={CATEGORY_MAP}
+      />
+
+      {/* 부스 목록 바텀 시트 */}
+      <BoothList
+        isVisible={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        onOpen={() => setIsSheetOpen(true)}
+        booths={booths}
+        isLoading={isLoading}
+        selectedCategory={selectedCategory}
+        selectedSubCategory={selectedSubCategory}
+        setSelectedSubCategory={setSelectedSubCategory}
+        categoryMap={CATEGORY_MAP}
       />
     </div>
   );

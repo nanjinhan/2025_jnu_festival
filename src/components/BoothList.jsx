@@ -1,58 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { fetchBooths } from '../services/api'; // 방금 만든 API 서비스 함수를 import
+// src/components/BoothList.jsx
 
-const BoothList = ({ isVisible, onClose }) => {
-  // 서버로부터 받아온 부스 목록을 저장할 state
-  const [booths, setBooths] = useState([]);
-  // 데이터 로딩 상태를 관리할 state
-  const [isLoading, setIsLoading] = useState(true);
+import React from 'react';
 
-  // 컴포넌트가 처음 렌더링될 때 한 번만 실행됩니다.
-  useEffect(() => {
-    // API를 호출하여 부스 데이터를 가져옵니다.
-    fetchBooths().then(data => {
-      setBooths(data);      // 받아온 데이터로 state 업데이트
-      setIsLoading(false);  // 로딩 상태를 false로 변경
-    });
-  }, []); // 빈 배열을 의존성으로 전달하여 최초 1회만 실행되도록 함
+function BoothList({
+  isVisible, onClose, onOpen, booths, isLoading,
+  selectedCategory, selectedSubCategory, setSelectedSubCategory, categoryMap
+}) {
+
+  const currentMainCategory = categoryMap.find(cat => cat.key === selectedCategory);
+  const availableSubCategories = currentMainCategory ? currentMainCategory.subCategories : [];
+
+  const filteredBooths = booths.filter(booth => {
+    const mainCatObject = categoryMap.find(cat => cat.key === selectedCategory);
+    if (!mainCatObject) return false; // 혹시 모를 에러 방지
+    const mainCatNameToFilter = mainCatObject.name;
+  
+    const mainMatch = selectedCategory === 'ALL' || booth.main_category === mainCatNameToFilter;
+    if (!mainMatch) {
+      return false; // 대분류가 다르면 더 이상 비교할 필요 없음
+    }
+    const subCatObject = mainCatObject.subCategories.find(sub => sub.key === selectedSubCategory);
+    const subCatNameToFilter = subCatObject ? subCatObject.name : '';
+    const subMatch = selectedSubCategory === 'ALL' || booth.sub_category === subCatNameToFilter;
+    
+    return subMatch;
+  });
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <p style={{ textAlign: 'center', color: '#666', paddingTop: '20px' }}>목록을 불러오는 중입니다...</p>;
+    }
+    if (filteredBooths.length === 0) {
+      return <p style={{ textAlign: 'center', color: '#666', paddingTop: '20px' }}>표시할 부스가 없습니다.</p>;
+    }
+    return filteredBooths.map(booth => (
+      <div key={booth.id} style={{ padding: '12px 0', borderBottom: '1px solid #eee' }}>
+        <h3 style={{ margin: 0, fontWeight: 'bold' }}>{booth.name}</h3>
+        <p style={{ margin: '4px 0 0', color: '#666' }}>{booth.description}</p>
+      </div>
+    ));
+  };
 
   return (
     <div
-      className={`
-        fixed bottom-0 left-0 right-0 z-10 bg-white rounded-t-2xl shadow-2xl
-        transition-transform duration-500 ease-in-out
-        ${isVisible ? 'translate-y-0' : 'translate-y-[calc(100%-80px)]'}
-      `}
+      style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
+        backgroundColor: 'white', borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
+        boxShadow: '0 -4px 12px rgba(0,0,0,0.1)',
+        transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 70px))',
+        transition: 'transform 0.3s ease-in-out', zIndex: 20,
+        cursor: !isVisible ? 'pointer' : 'default',
+      }}
+      onClick={() => !isVisible && onOpen()}
     >
-      <div className="p-4 flex justify-between items-center border-b">
-        <h2 className="text-lg font-bold">부스 목록</h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-800" aria-label="목록 닫기">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      <div
+        onClick={(e) => { if (isVisible) { e.stopPropagation(); onClose(); } }}
+        style={{ width: '100%', height: '70px', padding: '12px', cursor: 'pointer', textAlign: 'center', boxSizing: 'border-box' }}
+      >
+        <div style={{ width: '40px', height: '4px', backgroundColor: '#d0d0d0', borderRadius: '2px', margin: '0 auto' }} />
+        {/* ✅ 1. 비어있던 p 태그에 텍스트 추가 */}
+        <p style={{ margin: '8px 0 0', fontWeight: 'bold', fontSize: '16px', color: '#555' }}>
+          
+        </p>
       </div>
 
-      <div className="p-4 max-h-[60vh] overflow-y-auto">
-        {/* 로딩 중일 때와 데이터가 없을 때의 UI 처리 */}
-        {isLoading ? (
-          <p className="text-center text-gray-500">목록을 불러오는 중입니다...</p>
-        ) : booths.length > 0 ? (
-          <div className="space-y-3">
-            {booths.map((booth) => (
-              <div key={booth.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                <p className="font-bold text-md text-blue-600">{booth.name}</p>
-                <p className="text-sm text-gray-700 mt-1">{booth.description}</p>
-                <p className="text-xs text-gray-500 mt-2">위치: {booth.location}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">등록된 부스가 없습니다.</p>
-        )}
+      {isVisible && availableSubCategories.length > 0 && (
+        <div className="horizontal-scroll-container" style={{ padding: '0 16px 12px', borderBottom: '1px solid #eee', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+          <button onClick={() => setSelectedSubCategory('ALL')} style={{ backgroundColor: selectedSubCategory === 'ALL' ? '#e8f0fe' : '#f1f3f4', color: selectedSubCategory === 'ALL' ? '#1967d2' : '#3c4043', border: 'none', padding: '6px 12px', borderRadius: '16px', marginRight: '8px', cursor: 'pointer', fontWeight: '500' }}>
+            전체
+          </button>
+          {availableSubCategories.map(subCat => (
+            <button
+              key={subCat.key}
+              onClick={() => setSelectedSubCategory(subCat.key)}
+              style={{
+                backgroundColor: selectedSubCategory === subCat.key ? '#e8f0fe' : '#f1f3f4',
+                color: selectedSubCategory === subCat.key ? '#1967d2' : '#3c4043',
+                border: 'none', padding: '6px 12px', borderRadius: '16px', marginRight: '8px', cursor: 'pointer', fontWeight: '500'
+              }}
+            >
+              {subCat.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div style={{ overflowY: 'auto', height: `calc(100% - 70px - ${isVisible && availableSubCategories.length > 0 ? '53px' : '0px'})`, padding: '0 16px' }}>
+        {renderContent()}
       </div>
     </div>
   );
-};
+}
 
 export default BoothList;
