@@ -17,7 +17,9 @@ function HomePage() {
   const dDayText = `D-${diff > 0 ? diff : 0}`;
 
   // 여기에 카카오맵 초기화 코드
-  useEffect(() => {
+ useEffect(() => {
+  // kakao 객체와 그 안의 maps가 모두 존재하는지 확인
+  if (window.kakao && window.kakao.maps) {
     const container = document.getElementById("miniMap");
     if (!container) return;
 
@@ -33,7 +35,8 @@ function HomePage() {
       position: markerPosition,
     });
     marker.setMap(map);
-  }, []);
+  }
+}, []);
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-green-50 to-gray-100 flex flex-col">
