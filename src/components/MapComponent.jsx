@@ -16,7 +16,7 @@ function MapComponent({ booths,
   // 카카오맵 스크립트 로딩
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.NEXT_PUBLIC_VITE_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`;
     script.async = true;
     document.head.appendChild(script);
     script.onload = () => window.kakao.maps.load(() => setIsScriptLoaded(true));
