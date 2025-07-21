@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import MapComponent from '../components/MapComponent';
 import BoothList from '../components/BoothList';
 import FilterControls from '../components/FilterControls'; // 필터 UI 컴포넌트 import
-import { fetchBooths } from '../services/api';
+import BoothData from '../data/BoothData'; // ✅ 1. 데이터 파일 import
+//import { fetchBooths } from '../services/api';
 import './MapPage.css'; // 스크롤바 숨김 CSS를 위해 import
 
 // 카테고리 데이터 구조
@@ -43,14 +44,15 @@ const TIME_FILTERS = [
 
 function MapPage() {
   // 모든 상태(State)는 MapPage에서 중앙 관리합니다.
-  const [booths, setBooths] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+ // const [booths, setBooths] = useState([]);
+  const [booths, setBooths] = useState(BoothData);
+  //const [isLoading, setIsLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_MAP[0].key);
   const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
   const [selectedTime, setSelectedTime] = useState(TIME_FILTERS[0].key);
   const [searchTerm, setSearchTerm] = useState('');
-
+/*
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -60,7 +62,7 @@ function MapPage() {
     };
     loadData();
   }, []);
-
+*/
   const handleSelectCategory = (categoryKey) => {
     setSelectedCategory(categoryKey);
     setSelectedSubCategory('ALL'); // 대분류 변경 시 소분류는 '전체'로 초기화
