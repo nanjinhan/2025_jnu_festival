@@ -52,17 +52,17 @@ function MapPage() {
   const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
   const [selectedTime, setSelectedTime] = useState(TIME_FILTERS[0].key);
   const [searchTerm, setSearchTerm] = useState('');
-
+/*
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-     // const data = await fetchBooths();
+      const data = await fetchBooths();
       setBooths(data);
       setIsLoading(false);
     };
     loadData();
   }, []);
-
+*/
   const handleSelectCategory = (categoryKey) => {
     setSelectedCategory(categoryKey);
     setSelectedSubCategory('ALL'); // 대분류 변경 시 소분류는 '전체'로 초기화
@@ -98,7 +98,7 @@ function MapPage() {
         onClose={() => setIsSheetOpen(false)}
         onOpen={() => setIsSheetOpen(true)}
         booths={booths}
-        isLoading={isLoading}
+        //isLoading={isLoading}
         selectedCategory={selectedCategory}
         selectedSubCategory={selectedSubCategory}
         setSelectedSubCategory={setSelectedSubCategory}
