@@ -1,0 +1,53 @@
+/* 메인 전체 레이아웃 */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f4fff2;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* 마스코트 이미지 */
+.mascot {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+/* 타이틀 */
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d6a4f;
+  margin-bottom: 1rem;
+}
+
+/* 버튼 영역 */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 160px);
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+/* 버튼 공통 스타일 */
+.link-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background-color: #b7e4c7;
+  border-radius: 15px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #1b4332;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease-in-out;
+}
+
+.link-button:hover {
+  background-color: #95d5b2;
+  transform: translateY(-2px);
+}
